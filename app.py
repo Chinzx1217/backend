@@ -4,10 +4,14 @@ from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
+@app.route("/")
+def home():
+    return "HTC service is running"
+
 @app.route("/weather")
 def weather():
     city = request.args.get("q", "Melaka")
-    api_key = os.environ.get("OPENWEATHER_KEY")  # 注意这里要和你设置的 KEY 名一致
+    api_key = os.environ.get("OPENWEATHER_KEY")
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     try:
         r = requests.get(url)

@@ -1,9 +1,22 @@
-from config import app, HOST, PORT
-from config import WEATHER_ENABLED, STOCKS_ENABLED, YOUTUBE_ENABLED
-import helpers
-if WEATHER_ENABLED: from weather.routes import *
-if STOCKS_ENABLED: from stocks.routes import *
-if YOUTUBE_ENABLED: from youtube.routes import *
+import os
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    return "HTC Weather Server is running!"
+
+@app.route("/weather")
+def weather():
+    city = request.args.get("q", "Unknown")
+    # 这里你可以以后换成真实天气 API
+    return jsonify({
+        "location": city,
+        "temperature": 25,
+        "condition": "Cloudy"
+    })
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=PORT, debug=False)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

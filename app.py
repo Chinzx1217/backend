@@ -23,7 +23,7 @@ def weather():
         r = requests.get(url)
         data = r.json()
         
-        # 检查 API 返回是否有错误
+        # 如果 API 返回错误状态码
         if r.status_code != 200:
             return jsonify({
                 "error": "Failed to fetch weather",
@@ -32,4 +32,19 @@ def weather():
             }), r.status_code
         
         # 返回天气信息
-        return jsoni
+        return jsonify({
+            "location": city,
+            "temperature": data["main"]["temp"],
+            "condition": data["weather"][0]["description"]
+        })
+
+    except Exception as e:
+        return jsonify({
+            "error": "Failed to fetch weather",
+            "detail": str(e),
+            "response": r.text if 'r' in locals() else None
+        }), 500
+
+if __name__ == "__main__":
+    # 绑定所有 IP 和端口，Render 可访问
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

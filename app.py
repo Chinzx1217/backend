@@ -1,36 +1,34 @@
+from flask import Flask, jsonify, render_template_string, request
 import os
 import requests
-from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
-# 根路径，显示服务运行状态
+# 首页路由，显示 HTC 服务运行提示
 @app.route("/")
 def home():
-    return "HTC service is running"
+    return render_template_string("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>HTC Weather Service</title>
+        <style>
+            body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+            h1 { color: #333; }
+            p { color: #666; }
+        </style>
+    </head>
+    <body>
+        <h1>HTC service is running</h1>
+        <p>Use <code>/weather?q=Melaka</code> to get weather info</p>
+    </body>
+    </html>
+    """)
 
-# 获取天气信息
+# 天气 API 路由
 @app.route("/weather")
 def weather():
     city = request.args.get("q", "Melaka")
-    api_key = os.environ.get("OPENWEATHER_KEY")  # 确保 Render 上有设置这个环境变量
+    api_key = os.environ.get("OPENWEATHER_KEY")
     if not api_key:
-        return jsonify({"error": "API key not found"})
-    
-    url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
-    try:
-        r = requests.get(url, timeout=10)
-        r.raise_for_status()
-        data = r.json()
-        return jsonify({
-            "location": city,
-            "temperature": data["main"]["temp"],
-            "condition": data["weather"][0]["description"]
-        })
-    except requests.exceptions.RequestException as e:
-        return jsonify({"error": "Failed to fetch weather", "detail": str(e)})
-
-# Render 自动使用 PORT 环境变量
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+        return jsonify({"error": "API key not found"

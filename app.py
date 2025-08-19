@@ -19,24 +19,25 @@ def home():
         </style>
     </head>
     <body>
-        <h1>HTC Weather Service Running</h1>
-        <p>Use <code>/weather?q=Melaka</code> or app URLs to get weather info</p>
+        <h1>HTC service is running</h1>
+        <p>Use <code>/weather?q=城市</code>, <code>/getweather?lat=&lon=</code>, or <code>/getstaticweather?locCode=</code></p>
     </body>
     </html>
     """)
 
-# 城市名字查询
+# 城市名称查询
 @app.route("/weather")
 def weather():
     city = request.args.get("q", "Melaka")
     api_key = os.environ.get("OPENWEATHER_KEY")
     if not api_key:
         return jsonify({"error": "API key not found"})
+
     url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     r = requests.get(url)
     return jsonify(r.json())
 
-# 经纬度动态定位
+# 动态经纬度查询
 @app.route("/getweather")
 def getweather():
     lat = request.args.get("lat")
@@ -46,6 +47,7 @@ def getweather():
         return jsonify({"error": "API key not found"})
     if not lat or not lon:
         return jsonify({"error": "Missing lat/lon"})
+
     url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
     r = requests.get(url)
     return jsonify(r.json())
@@ -57,6 +59,7 @@ def getstaticweather():
     api_key = os.environ.get("OPENWEATHER_KEY")
     if not api_key:
         return jsonify({"error": "API key not found"})
+
     url = f"https://api.openweathermap.org/data/2.5/weather?q={loc}&appid={api_key}&units=metric"
     r = requests.get(url)
     return jsonify(r.json())

@@ -20,15 +20,52 @@ def home():
     </head>
     <body>
         <h1>HTC service is running</h1>
-        <p>Use <code>/weather?q=Melaka</code> to get weather info</p>
+        <p>Use <code>/weather?q=Melaka</code> or app URLs to get weather info</p>
     </body>
     </html>
     """)
 
-# 天气 API 路由
+# 固定城市或 q 参数查询天气（兼容测试）
 @app.route("/weather")
 def weather():
     city = request.args.get("q", "Melaka")
     api_key = os.environ.get("OPENWEATHER_KEY")
     if not api_key:
-        return jsonify({"error": "API key not found"
+        return jsonify({"error": "API key not found"})
+    
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
+    r = requests.get(url)
+    return jsonify(r.json())
+
+# 动态定位路由（HTC app 会替换 %s）
+@app.route("/getweather")
+def getweather():
+    lat = request.args.get("lat")
+    lon = request.args.get("lon")
+    api_key = os.environ.get("OPENWEATHER_KEY")
+    if not api_key:
+        return jsonify({"error": "API key not found"})
+    if not lat or not lon:
+        return jsonify({"error": "Missing lat/lon"})
+    
+    url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={api_key}&units=metric"
+    r = requests.get(url)
+    return jsonify(r.json())
+
+# 静态城市代码查询（HTC app 会替换 %ls）
+@app.route("/getstaticweather")
+def getstaticweather():
+    loc = request.args.get("locCode", "Melaka")
+    api_key = os.environ.get("OPENWEATHER_KEY")
+    if not api_key:
+        return jsonify({"error": "API key not found"})
+    
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={loc}&appid={api_key}&units=metric"
+    r = requests.get(url)
+    return jsonify(r.json())
+
+if __name__ == "__main__":
+    # 0.0.0.0 监听公网，如果在 Render 上部署保留即可
+    HOST = "0.0.0.0"
+    PORT = int(os.environ.get("PORT", 5000))
+    app.run(host=HOST, port=PORT)

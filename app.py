@@ -6,32 +6,28 @@ app = Flask(__name__)
 
 @app.route("/weather")
 def weather():
-    # 获取 URL 参数 q，默认 Melaka
     city = request.args.get("q", "Melaka")
     
-    # 从环境变量读取 OpenWeather API key
+    # 从环境变量读取 OpenWeather API Key
     api_key = os.environ.get("OPENWEATHER_KEY")
     print("DEBUG: OPENWEATHER_KEY =", api_key)  # 调试打印 Key
 
     if not api_key:
         return jsonify({"error": "OPENWEATHER_KEY not set in environment"}), 500
 
-    # 构建请求 URL
     url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={api_key}&units=metric"
     
     try:
         r = requests.get(url)
         data = r.json()
         
-        # 如果 API 返回错误状态码
         if r.status_code != 200:
             return jsonify({
                 "error": "Failed to fetch weather",
                 "detail": data,
                 "response": r.text
             }), r.status_code
-        
-        # 返回天气信息
+
         return jsonify({
             "location": city,
             "temperature": data["main"]["temp"],
@@ -46,5 +42,4 @@ def weather():
         }), 500
 
 if __name__ == "__main__":
-    # 绑定所有 IP 和端口，Render 可访问
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
